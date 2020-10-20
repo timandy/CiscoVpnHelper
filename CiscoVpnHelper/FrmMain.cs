@@ -15,12 +15,12 @@ namespace CiscoVpnHelper
 {
     public partial class FrmMain : Form
     {
+        private readonly AutoLoginUtil util = new AutoLoginUtil();
         private Label lblPwd;
         private TextBox txtPwd;
         private Button btnAutoLogin;
         private Timer timer;
         private NotifyIcon notifyIcon;
-        private readonly ISet<IntPtr> handledPwdWnd = new HashSet<IntPtr>();
 
         public FrmMain()
         {
@@ -31,10 +31,8 @@ namespace CiscoVpnHelper
 
         private void InitLogic()
         {
-            string filePath = "./password.txt";
-            if (File.Exists(filePath))
-                this.txtPwd.Text = File.ReadAllText(filePath, Encoding.ASCII);
-            this.txtPwd.TextChanged += (sender, e) => { File.WriteAllText(filePath, this.txtPwd.Text, Encoding.ASCII); };
+            this.txtPwd.Text = this.util.readPasswordFromConfig();
+            this.txtPwd.TextChanged += (sender, e) => { this.util.savePasswordFromConfig(this.txtPwd.Text); };
 
             //按钮
             this.btnAutoLogin.Text = this.timer.Enabled ? "已启用" : "已禁用";
@@ -47,25 +45,9 @@ namespace CiscoVpnHelper
             //定时器
             this.timer.Tick += (sender, e) =>
             {
-                IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect | Haier-ChinaUnicom");
-                if (hwnd == IntPtr.Zero)
-                    return;
-                IntPtr hwndLblPwd = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Static", "Password:");
-                if (hwndLblPwd == IntPtr.Zero)
-                    return;
-                IntPtr hwndTxtPwd = UnsafeNativeMethods.FindWindowEx(hwnd, hwndLblPwd, "Edit", null);
-                if (hwndTxtPwd == IntPtr.Zero)
-                    return;
-                if (this.handledPwdWnd.Contains(hwndTxtPwd))
-                    return;
-
-                UnsafeNativeMethods.SetWindowText(hwndTxtPwd, string.Empty);
-                foreach (char ch in this.txtPwd.Text)
-                {
-                    UnsafeNativeMethods.SendMessage(hwndTxtPwd, NativeMethods.WM_CHAR, (IntPtr) ch, null);
-                }
-
-                this.handledPwdWnd.Add(hwndTxtPwd);
+                this.util.clickConnectButton();
+                this.util.inputPassword(this.txtPwd.Text);
+                this.util.clickAccept();
             };
 
 
