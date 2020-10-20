@@ -33,6 +33,8 @@ namespace CiscoVpnHelper
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect Secure Mobility Client");
             if (hwnd == IntPtr.Zero)
                 return;
+            if (!Util.GetIsHandleCreated(hwnd))
+                return;
             IntPtr handPanel = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "#32770", null);
             if (handPanel == IntPtr.Zero)
                 return;
@@ -51,6 +53,8 @@ namespace CiscoVpnHelper
         {
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect | Haier-ChinaUnicom");
             if (hwnd == IntPtr.Zero)
+                return;
+            if (!Util.GetIsHandleCreated(hwnd))
                 return;
             //防止多次输入
             if (this.handledPwdWnd.Contains(hwnd))
@@ -85,6 +89,8 @@ namespace CiscoVpnHelper
         {
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect");
             if (hwnd == IntPtr.Zero)
+                return;
+            if (!Util.GetIsHandleCreated(hwnd))
                 return;
             IntPtr hwndAccept = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Button", "Accept");
             if (hwndAccept == IntPtr.Zero)
