@@ -27,18 +27,26 @@ namespace CiscoVpnHelper
             File.WriteAllText(configFilePath, password, Encoding.ASCII);
         }
 
+        //关闭网络错误对话框
+        public void closeNetworkErrorDialog()
+        {
+            IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect");
+            if (hwnd == IntPtr.Zero)
+                return;
+            UnsafeNativeMethods.SendMessage(hwnd, NativeMethods.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            UnsafeNativeMethods.SendMessage(hwnd, NativeMethods.WM_DESTROY, IntPtr.Zero, IntPtr.Zero);
+        }
+
         //单击 Connect
         public void clickConnectButton()
         {
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect Secure Mobility Client");
             if (hwnd == IntPtr.Zero)
                 return;
-            if (!Util.GetIsHandleCreated(hwnd))
+            IntPtr hwndPanel = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "#32770", null);
+            if (hwndPanel == IntPtr.Zero)
                 return;
-            IntPtr handPanel = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "#32770", null);
-            if (handPanel == IntPtr.Zero)
-                return;
-            IntPtr hwndConnect = UnsafeNativeMethods.FindWindowEx(handPanel, IntPtr.Zero, "Button", "Connect");
+            IntPtr hwndConnect = UnsafeNativeMethods.FindWindowEx(hwndPanel, IntPtr.Zero, "Button", "Connect");
             if (hwndConnect == IntPtr.Zero)
                 return;
             bool isConnectEnabled = Util.GetEnabled(hwndConnect);
@@ -47,14 +55,11 @@ namespace CiscoVpnHelper
             Util.SendMouseClick(hwndConnect, Point.Empty);
         }
 
-
         //输入密码
         public void inputPassword(string password)
         {
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect | Haier-ChinaUnicom");
             if (hwnd == IntPtr.Zero)
-                return;
-            if (!Util.GetIsHandleCreated(hwnd))
                 return;
             //防止多次输入
             if (this.handledPwdWnd.Contains(hwnd))
@@ -89,8 +94,6 @@ namespace CiscoVpnHelper
         {
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect");
             if (hwnd == IntPtr.Zero)
-                return;
-            if (!Util.GetIsHandleCreated(hwnd))
                 return;
             IntPtr hwndAccept = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Button", "Accept");
             if (hwndAccept == IntPtr.Zero)

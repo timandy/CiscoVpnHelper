@@ -45,6 +45,7 @@ namespace CiscoVpnHelper
             //定时器
             this.timer.Tick += (sender, e) =>
             {
+                this.util.closeNetworkErrorDialog();
                 this.util.clickConnectButton();
                 this.util.inputPassword(this.txtPwd.Text);
                 this.util.clickAccept();
