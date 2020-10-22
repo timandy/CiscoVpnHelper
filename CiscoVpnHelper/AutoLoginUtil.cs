@@ -61,32 +61,41 @@ namespace CiscoVpnHelper
             IntPtr hwnd = UnsafeNativeMethods.FindWindow("#32770", "Cisco AnyConnect | Haier-ChinaUnicom");
             if (hwnd == IntPtr.Zero)
                 return;
-            //防止多次输入
-            if (this.handledPwdWnd.Contains(hwnd))
-                return;
-            this.handledPwdWnd.Add(hwnd);
-
-            IntPtr hwndLblPwd = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Static", "Password:");
-            if (hwndLblPwd == IntPtr.Zero)
-                return;
-            IntPtr hwndTxtPwd = UnsafeNativeMethods.FindWindowEx(hwnd, hwndLblPwd, "Edit", null);
-            if (hwndTxtPwd == IntPtr.Zero)
-                return;
-
-            //输入密码
-            foreach (char ch in password)
+            try
             {
-                UnsafeNativeMethods.SendMessage(hwndTxtPwd, NativeMethods.WM_CHAR, (IntPtr) ch, null);
-            }
+                //防止多次输入
+                if (this.handledPwdWnd.Contains(hwnd))
+                    return;
+                this.handledPwdWnd.Add(hwnd);
 
-            //单击OK
-            IntPtr hwndOK = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Button", "OK");
-            if (hwndTxtPwd == IntPtr.Zero)
-                return;
-            bool isOKEnabled = Util.GetEnabled(hwndOK);
-            if (!isOKEnabled)
-                return;
-            Util.SendMouseClick(hwndOK, Point.Empty);
+                IntPtr hwndLblPwd = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Static", "Password:");
+                if (hwndLblPwd == IntPtr.Zero)
+                    return;
+                IntPtr hwndTxtPwd = UnsafeNativeMethods.FindWindowEx(hwnd, hwndLblPwd, "Edit", null);
+                if (hwndTxtPwd == IntPtr.Zero)
+                    return;
+
+                //输入密码
+                foreach (char ch in password)
+                {
+                    UnsafeNativeMethods.SendMessage(hwndTxtPwd, NativeMethods.WM_CHAR, (IntPtr) ch, null);
+                }
+
+                //单击OK
+                IntPtr hwndOK = UnsafeNativeMethods.FindWindowEx(hwnd, IntPtr.Zero, "Button", "OK");
+                if (hwndTxtPwd == IntPtr.Zero)
+                    return;
+                bool isOKEnabled = Util.GetEnabled(hwndOK);
+                if (!isOKEnabled)
+                    return;
+                Util.SendMouseClick(hwndOK, Point.Empty);
+            }
+            finally
+            {
+                //防止点击按钮失效,卡在此界面
+                UnsafeNativeMethods.SendMessage(hwnd, NativeMethods.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                UnsafeNativeMethods.SendMessage(hwnd, NativeMethods.WM_DESTROY, IntPtr.Zero, IntPtr.Zero);
+            }
         }
 
         //单击 Accept
